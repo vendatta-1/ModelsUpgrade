@@ -106,7 +106,7 @@ namespace Repositories.Implementations
 
         public async Task<T?> GetLastOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
         {
-            return await FetchSingleAsync(async () => await _dbSet.OrderByDescending(x => x).FirstOrDefaultAsync(filter, cancellationToken));
+            return await FetchSingleAsync(async () => await _dbSet.LastOrDefaultAsync(filter, cancellationToken));
         }
 
         public async Task<int> GetCountAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
@@ -152,7 +152,8 @@ namespace Repositories.Implementations
 
             totalCount = await query.CountAsync(cancellationToken);
 
-            if (orderBy != null) query = orderBy(query);
+            if (orderBy != null)
+                query = orderBy(query);
 
             return query.Skip((currentPage - 1) * pageSize).Take(pageSize);
         }

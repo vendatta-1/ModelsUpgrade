@@ -1,8 +1,9 @@
-﻿using System.Linq.Expressions;
+﻿using ModelsUpgrade.Apstractions;
+using System.Linq.Expressions;
 
 namespace Repositories.Interfaces
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<T> where T : Entity, new()
     {
         #region Create
 
