@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ModelsUpgrade.Apstractions;
 using Repositories.Interfaces;
+using Repositories.Result;
 using System.Linq.Expressions;
 
 namespace Repositories.Implementations
@@ -130,19 +131,26 @@ namespace Repositories.Implementations
             return await Task.FromResult(query);
         }
         //has an error because the async not support the out or ref can instead use PageResult object 
-        public async Task<IQueryable<T>> GetPagedAsync(int pageSize, int currentPage, out int totalCount, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default)
+        public async Task<PageResult<T>> GetPagedAsync(int pageSize, int currentPage, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default)
         {
             IQueryable<T> query = _dbSet;
 
-            totalCount = await query.CountAsync(cancellationToken);
+            var pageResult = new PageResult<T>();
+            pageResult.TotalCount = await query.CountAsync(cancellationToken);
 
-            if (orderBy != null) query = orderBy(query);
+            if (orderBy != null)
+                query = orderBy(query);
 
-            return query.Skip((currentPage - 1) * pageSize).Take(pageSize);
+            pageResult.Items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
+            pageResult.CurrentPage = currentPage;
+            pageResult.PageSize = pageSize;
+
+            return pageResult;
         }
 
-        public async Task<IQueryable<T>> GetFilteredAsync(int pageSize, int currentPage, out int totalCount, Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties)
+        public async Task<PageResult<T>> GetFilteredAsync(int pageSize, int currentPage, Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties)
         {
+            var pageRsult = new PageResult<T>();
             IQueryable<T> query = _dbSet;
             if (filter != null)
                 query = query.Where(filter);
@@ -150,12 +158,15 @@ namespace Repositories.Implementations
             foreach (var include in includeProperties)
                 query = query.Include(include);
 
-            totalCount = await query.CountAsync(cancellationToken);
+            pageRsult.TotalCount = await query.CountAsync(cancellationToken);
 
             if (orderBy != null)
                 query = orderBy(query);
 
-            return query.Skip((currentPage - 1) * pageSize).Take(pageSize);
+            pageRsult.Items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
+            pageRsult.CurrentPage = currentPage;
+            pageRsult.PageSize = pageSize;
+            return pageRsult;
         }
 
         #endregion

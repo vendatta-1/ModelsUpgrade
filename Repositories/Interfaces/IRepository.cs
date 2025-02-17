@@ -1,4 +1,5 @@
 ﻿using ModelsUpgrade.Apstractions;
+using Repositories.Result;
 using System.Linq.Expressions;
 
 namespace Repositories.Interfaces
@@ -32,9 +33,9 @@ namespace Repositories.Interfaces
 
         Task<IQueryable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties);
 
-        Task<IQueryable<T>> GetPagedAsync(int pageSize, int currentPage, out int totalCount, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default);
+        Task<PageResult<T>> GetPagedAsync(int pageSize, int currentPage, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default);
 
-        Task<IQueryable<T>> GetFilteredAsync(int pageSize, int currentPage, out int totalCount, Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties);
+        Task<PageResult<T>> GetFilteredAsync(int pageSize, int currentPage, Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties);
         #endregion
 
         #region Update
