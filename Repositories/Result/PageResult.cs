@@ -2,10 +2,14 @@
 {
     public class PageResult<T>
     {
+        public PageResult(IEnumerable<T> items)
+        {
+            Items = items;
+        }
         /// <summary>
         /// The items on the current page.
         /// </summary>
-        public IEnumerable<T> Items { get; set; } = new List<T>();
+        public IEnumerable<T> Items { get; set; }
 
         /// <summary>
         /// The total number of items across all pages.

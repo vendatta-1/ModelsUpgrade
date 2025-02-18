@@ -135,22 +135,27 @@ namespace Repositories.Implementations
         {
             IQueryable<T> query = _dbSet;
 
-            var pageResult = new PageResult<T>();
-            pageResult.TotalCount = await query.CountAsync(cancellationToken);
+
+            var totalCount = await query.CountAsync(cancellationToken);
 
             if (orderBy != null)
                 query = orderBy(query);
 
-            pageResult.Items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
-            pageResult.CurrentPage = currentPage;
-            pageResult.PageSize = pageSize;
+            var items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
-            return pageResult;
+
+
+            return new PageResult<T>(items)
+            {
+                TotalCount = totalCount,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+            };
         }
 
         public async Task<PageResult<T>> GetFilteredAsync(int pageSize, int currentPage, Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken cancellationToken = default, params string[] includeProperties)
         {
-            var pageRsult = new PageResult<T>();
+
             IQueryable<T> query = _dbSet;
             if (filter != null)
                 query = query.Where(filter);
@@ -158,15 +163,19 @@ namespace Repositories.Implementations
             foreach (var include in includeProperties)
                 query = query.Include(include);
 
-            pageRsult.TotalCount = await query.CountAsync(cancellationToken);
+            var totalCount = await query.CountAsync(cancellationToken);
 
             if (orderBy != null)
                 query = orderBy(query);
 
-            pageRsult.Items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
-            pageRsult.CurrentPage = currentPage;
-            pageRsult.PageSize = pageSize;
-            return pageRsult;
+            var items = query.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+            return new PageResult<T>(items)
+            {
+                TotalCount = totalCount,
+                CurrentPage = currentPage,
+                PageSize = pageSize
+            };
         }
 
         #endregion
